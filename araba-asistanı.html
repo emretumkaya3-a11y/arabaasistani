@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yol Arkadaşım | Arıza Destek</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-md w-full bg-slate-800 rounded-2xl shadow-2xl p-6 border border-slate-700">
+        <h2 class="text-2xl font-bold text-orange-500 mb-4 text-center">🚗 Yol Arkadaşım</h2>
+        
+        <div class="mb-4">
+            <!-- ID ve NAME eklendi, hata almanı engeller -->
+            <label for="soruKutusu" class="block text-sm font-medium mb-2 text-slate-400">Aracınızdaki sorunu yazın:</label>
+            <input type="text" 
+                   id="soruKutusu" 
+                   name="soruKutusu" 
+                   placeholder="Örn: Motor arıza lambası neden yanar?" 
+                   class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 focus:ring-2 focus:ring-orange-500 outline-none transition">
+        </div>
+
+        <button onclick="cevapAl()" 
+                id="gonderBtn"
+                class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-lg transition duration-200">
+            SORUYU GÖNDER
+        </button>
+
+        <div id="cevapAlani" class="mt-6 p-4 rounded-lg bg-slate-900 border border-slate-700 min-h-[100px] text-sm leading-relaxed">
+            <span class="text-slate-500 italic">Cevap burada görünecek...</span>
+        </div>
+    </div>
+
+    <script>
+        async function cevapAl() {
+            const input = document.getElementById('soruKutusu');
+            const output = document.getElementById('cevapAlani');
+            const btn = document.getElementById('gonderBtn');
+            
+            // BURAYA KENDİ ANAHTARINI YAPIŞTIR
+            const API_KEY = "AIzaSyDtAN-lmb4ZGz3XmFEXOBlKBUMXBUS6jWk"; 
+
+            if (!input.value.trim()) return;
+
+            output.innerHTML = "<span class='text-orange-400 animate-pulse'>Yapay zeka motoru kontrol ediyor...</span>";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: input.value }] }]
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    output.innerHTML = `<span class='text-red-500'>Hata: ${data.error.message}</span>`;
+                } else {
+                    const aiCevabi = data.candidates[0].content.parts[0].text;
+                    // Markdown (yıldız işaretleri) temizliği için basit bir düzenleme
+                    output.innerText = aiCevabi;
+                }
+            } catch (err) {
+                output.innerHTML = `<span class='text-red-500'>Bağlantı kesildi: ${err.message}</span>`;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
