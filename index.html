@@ -13,7 +13,7 @@
         
         <div class="mb-4">
             <label for="soruKutusu" class="block text-sm font-medium mb-2 text-slate-400">Aracınızdaki sorunu yazın:</label>
-            <input type="text" id="soruKutusu" name="soruKutusu" placeholder="Örn: Corsa tekleme yapıyor..." 
+            <input type="text" id="soruKutusu" name="soruKutusu" placeholder="Örn: Corsa yağ lambası yanıyor..." 
                    class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 outline-none text-white focus:ring-2 focus:ring-orange-500">
         </div>
 
@@ -27,15 +27,6 @@
         </div>
     </div>
 
-    <!-- Google'ın Kendi Bağlantı Kütüphanesini Çağırıyoruz -->
-    <script type="importmap">
-      {
-        "imports": {
-          "@google/generative-ai": "https://esm.run/@google/generative-ai"
-        }
-      }
-    </script>
-
     <script type="module">
       import { GoogleGenerativeAI } from "@google/generative-ai";
 
@@ -44,8 +35,8 @@
           const output = document.getElementById('cevapAlani');
           const btn = document.getElementById('gonderBtn');
 
-          // KENDİ API ANAHTARINIZI BURAYA YAZIN
-          const API_KEY = "AIzaSyA-xsIQiEc_OncWJIrcII_gt1ZytkHamQs"; 
+          // BURAYA KENDİ ANAHTARINI YAPIŞTIR
+          const API_KEY = "AIzaSyDtAN-lmb4ZGz3XmFEXOBlKBUMXBUS6jWk"; 
 
           if (!input.value.trim()) return;
 
@@ -54,13 +45,17 @@
 
           try {
               const genAI = new GoogleGenerativeAI(API_KEY);
-              const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+              
+              // MODEL İSMİNİ "gemini-1.5-flash" OLARAK GÜNCELLEDİK
+              // Bu kütüphane otomatik olarak en doğru URL'ye bağlanır
+              const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
               const result = await model.generateContent(input.value);
               const response = await result.response;
               output.innerText = response.text();
           } catch (err) {
-              output.innerHTML = `<span class='text-red-500 font-bold text-center'>Bir hata oluştu. Lütfen API anahtarınızı kontrol edin veya biraz sonra tekrar deneyin.</span><br><small class='text-gray-500'>${err.message}</small>`;
+              console.error(err);
+              output.innerHTML = `<span class='text-red-500 font-bold'>Bir hata oluştu!</span><br><small class='text-gray-500'>${err.message}</small>`;
           } finally {
               btn.disabled = false;
           }
