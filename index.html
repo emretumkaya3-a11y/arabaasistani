@@ -13,53 +13,65 @@
         
         <div class="mb-4">
             <label for="soruKutusu" class="block text-sm font-medium mb-2 text-slate-400">Aracınızdaki sorunu yazın:</label>
-            <input type="text" id="soruKutusu" name="soruKutusu" placeholder="Örn: Corsa yağ lambası yanıyor..." 
+            <input type="text" id="soruKutusu" placeholder="Örn: Corsa 1.2T tekleme sorunu..." 
                    class="w-full p-3 rounded-lg bg-slate-700 border border-slate-600 outline-none text-white focus:ring-2 focus:ring-orange-500">
         </div>
 
-        <button onclick="cevapAl()" id="gonderBtn"
+        <!-- Butondan onclick'i kaldırdık, kodun içinden dinleyeceğiz -->
+        <button id="gonderBtn"
                 class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-lg transition duration-200">
             SORUYU GÖNDER
         </button>
 
         <div id="cevapAlani" class="mt-6 p-4 rounded-lg bg-slate-900 border border-slate-700 min-h-[100px] text-sm leading-relaxed whitespace-pre-wrap">
-            <span class="text-slate-500 italic">Cevap burada görünecek...</span>
+            <span id="durumMesaji" class="text-slate-500 italic">Cevap burada görünecek...</span>
         </div>
     </div>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        }
+      }
+    </script>
 
     <script type="module">
       import { GoogleGenerativeAI } from "@google/generative-ai";
 
-      window.cevapAl = async function() {
-          const input = document.getElementById('soruKutusu');
-          const output = document.getElementById('cevapAlani');
-          const btn = document.getElementById('gonderBtn');
+      // Butonu ve giriş alanını seçiyoruz
+      const btn = document.getElementById('gonderBtn');
+      const input = document.getElementById('soruKutusu');
+      const output = document.getElementById('cevapAlani');
 
-          // BURAYA KENDİ ANAHTARINI YAPIŞTIR
+      // Butona tıklanma olayını burada tanımlıyoruz
+      btn.addEventListener('click', async () => {
           const API_KEY = "AIzaSyDtAN-lmb4ZGz3XmFEXOBlKBUMXBUS6jWk"; 
+          const soru = input.value.trim();
 
-          if (!input.value.trim()) return;
+          if (!soru) return;
 
           output.innerHTML = "<span class='text-orange-400 animate-pulse'>Yapay zeka analiz ediyor...</span>";
           btn.disabled = true;
+          btn.innerText = "DÜŞÜNÜYOR...";
 
           try {
               const genAI = new GoogleGenerativeAI(API_KEY);
-              
-              // MODEL İSMİNİ "gemini-1.5-flash" OLARAK GÜNCELLEDİK
-              // Bu kütüphane otomatik olarak en doğru URL'ye bağlanır
+              // "gemini-1.5-flash" en güncel ve hızlı modeldir
               const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-              const result = await model.generateContent(input.value);
+              const result = await model.generateContent(soru);
               const response = await result.response;
               output.innerText = response.text();
+              output.classList.add("text-white");
           } catch (err) {
               console.error(err);
-              output.innerHTML = `<span class='text-red-500 font-bold'>Bir hata oluştu!</span><br><small class='text-gray-500'>${err.message}</small>`;
+              output.innerHTML = `<span class='text-red-500 font-bold'>Hata Oluştu!</span><br><small class='text-gray-500'>${err.message}</small>`;
           } finally {
               btn.disabled = false;
+              btn.innerText = "SORUYU GÖNDER";
           }
-      }
+      });
     </script>
 </body>
 </html>
